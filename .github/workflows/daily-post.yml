@@ -1,0 +1,59 @@
+name: Daily Bible Verse Post
+
+on:
+  schedule:
+    # Runs at 08:00 UTC every day. Adjust to your preferred posting time.
+    - cron: "0 8 * * *"
+  workflow_dispatch: {}  # lets you trigger a run manually from the Actions tab
+
+permissions:
+  contents: write  # needed so the workflow can commit the generated image back
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate today's quote + image
+        run: python main.py
+
+      - name: Commit generated image to repo
+        id: commit
+        run: |
+          git config user.name "daily-verse-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add output/ state.json
+          git commit -m "Daily verse: $(date -u +%Y-%m-%d)" || echo "Nothing to commit"
+          git push
+
+      - name: Determine public image URL
+        id: image_url
+        run: |
+          META=$(ls output/*_meta.json | sort | tail -1)
+          echo "meta_path=$META" >> "$GITHUB_OUTPUT"
+          RELPATH=$(python -c "import json; print(json.load(open('$META'))['image_relpath'])")
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          URL="https://raw.githubusercontent.com/${{ github.repository }}/${BRANCH}/${RELPATH}"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Public image URL: $URL"
+
+      - name: Wait for raw.githubusercontent.com to serve the new file
+        run: sleep 30  # CDN cache can lag a few seconds after push
+
+      - name: Post to Instagram
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python post_to_instagram.py "${{ steps.image_url.outputs.meta_path }}" "${{ steps.image_url.outputs.url }}"
