@@ -57,7 +57,7 @@ def main():
 
     save_state(new_state)
     print(f"Done. Saved {final_path}")
-    print(f"Next run will continue from book_index={new_state['book_index']}, chapter={new_state['chapter']}")
+    print(f"Next run will continue from curated_index={new_state['curated_index']}")
 
 
 if __name__ == "__main__":
