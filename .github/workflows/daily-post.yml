@@ -52,6 +52,16 @@ jobs:
       - name: Wait for raw.githubusercontent.com to serve the new file
         run: sleep 30  # CDN cache can lag a few seconds after push
 
+      - name: Check Instagram secrets are configured
+        id: ig_check
+        run: |
+          if [ -n "${{ secrets.IG_USER_ID }}" ] && [ -n "${{ secrets.IG_ACCESS_TOKEN }}" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::IG_USER_ID and/or IG_ACCESS_TOKEN secrets are not set yet -- skipping the Instagram post step. Image generation and commit still ran normally."
+          fi
+
       - name: Post to Instagram
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
