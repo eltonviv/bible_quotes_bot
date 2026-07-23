@@ -19,7 +19,7 @@ import time
 
 import requests
 
-GRAPH_API_VERSION = "v21.0"
+GRAPH_API_VERSION = "v25.0"
 GRAPH_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
 
 
