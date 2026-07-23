@@ -22,7 +22,6 @@ import requests
 GRAPH_API_VERSION = "v25.0"
 GRAPH_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
 
-
 def create_container(ig_user_id: str, access_token: str, image_url: str, caption: str) -> str:
     url = f"{GRAPH_BASE}/{ig_user_id}/media"
     resp = requests.post(url, data={
@@ -30,9 +29,10 @@ def create_container(ig_user_id: str, access_token: str, image_url: str, caption
         "caption": caption,
         "access_token": access_token,
     })
+    if not resp.ok:
+        print(f"Graph API error response: {resp.text}")
     resp.raise_for_status()
     return resp.json()["id"]
-
 
 def publish_container(ig_user_id: str, access_token: str, container_id: str) -> str:
     url = f"{GRAPH_BASE}/{ig_user_id}/media_publish"
