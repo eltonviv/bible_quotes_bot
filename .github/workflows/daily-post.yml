@@ -2,8 +2,8 @@ name: Daily Bible Verse Post
 
 on:
   schedule:
-    # Runs at 08:00 UTC every day. Adjust to your preferred posting time.
-    - cron: "0 8 * * *"
+    # Runs at 11:00 SAST (09:00 UTC) every day. Adjust to your preferred posting time.
+    - cron: "0 9 * * *"
   workflow_dispatch: {}  # lets you trigger a run manually from the Actions tab
 
 permissions:
