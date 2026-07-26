@@ -29,6 +29,10 @@ jobs:
       - name: Generate today's quote + image
         run: python main.py
 
+      - name: Prune output files older than 7 days
+        run: |
+          find output -type f -mtime +7 -print -delete
+
       - name: Commit generated image to repo
         id: commit
         run: |
